@@ -13,7 +13,7 @@ class IptvProvider(private val store: CustomChannelStore? = null) : MainAPI() {
 
     companion object {
         // ĐỔI thành link playlist .m3u của mày (link http/https công khai hoặc của chính mày).
-        const val PLAYLIST_URL = "https://example.com/playlist.m3u"
+        const val PLAYLIST_URL = "https://tinyurl.com/aquativi"
     }
 
     data class Channel(
