@@ -1,0 +1,8 @@
+{
+  "name": "IPTV M3U",
+  "description": "Plugin IPTV đọc playlist .m3u, hỗ trợ kênh ClearKey và thêm kênh thủ công",
+  "manifestVersion": 1,
+  "pluginLists": [
+    "https://raw.githubusercontent.com/USERNAME/REPO/builds/plugins.json"
+  ]
+}
