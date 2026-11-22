@@ -1,19 +1,13 @@
 name: Build
 
-# Tự build plugin mỗi lần push, hoặc bấm tay ở tab Actions -> Build -> Run workflow.
-# Kết quả (file .cs3 + plugins.json) được đẩy lên nhánh "builds". Nhánh này tự tạo nếu chưa có.
-
 concurrency:
   group: build
   cancel-in-progress: true
 
 on:
   push:
-    branches:
-      - main
-      - master
-    paths-ignore:
-      - '*.md'
+    branches: [main, master]
+    paths-ignore: ['*.md']
   workflow_dispatch:
 
 permissions:
@@ -25,16 +19,32 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
-        with:
-          path: src
+        with: { path: src }
 
-      # Checkout lần 2 để có thư mục git đã có sẵn quyền push, dùng cho nhánh builds.
-      - name: Checkout (cho nhánh builds)
+      - name: Checkout builds
         uses: actions/checkout@v4
-        with:
-          path: builds
+        with: { path: builds }
 
       - name: Setup JDK 17
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
+        uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17', cache: gradle }
+
+      - name: Build plugins
+        working-directory: src
+        run: |
+          chmod +x gradlew
+          ./gradlew make makePluginsJson
+
+      - name: Push to builds branch
+        run: |
+          cd "$GITHUB_WORKSPACE/builds"
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git checkout --orphan builds-out
+          git rm -rf --quiet .
+          find "$GITHUB_WORKSPACE/src" -path '*/build/*.cs3' -exec cp {} . \;
+          cp "$GITHUB_WORKSPACE/src/build/plugins.json" .
+          ls -la
+          git add .
+          git commit -m "Build $GITHUB_SHA"
+          git push --force origin HEAD:refs/heads/builds
